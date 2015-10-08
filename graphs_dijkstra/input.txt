@@ -1,22 +1,22 @@
-***Nodes:
+[Nodes]
 Aqwe
 Fqwe
 Eqwe
 Bqwe
 Cqwe
 Dqwe
-***Arcs: (from to weight)
+[Arcs] (from to weight)
 Aqwe Bqwe 2
-Aqwe Cqwe 1
-Aqwe Dqwe 4
 Bqwe Dqwe 7
-Bqwe Eqwe 2.5
-Cqwe Dqwe 5
 Cqwe Eqwe 10
+Bqwe Eqwe 2.5
+Aqwe Dqwe 4
 Cqwe Fqwe 4
 Dqwe Fqwe 5
 Eqwe Fqwe 4
-***Path-begin:
+Aqwe Cqwe 1
+Cqwe Dqwe 5
+[Path-begin]
 Aqwe
-***Path-end:
+[Path-end]
 Fqwe

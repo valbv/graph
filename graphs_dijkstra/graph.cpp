@@ -41,6 +41,7 @@ void Graph::readArc(ifstream & fin, const string & strLine)
     float argArcWeight = stof(argWeight);
 
     _arcs.push_back(Arc(from, to, argArcWeight));
+    from->setOwnArc(_arcs.size() - 1);
 }
 
 void Graph::readPathBegin(ifstream & fin, const string & strLine)
@@ -50,7 +51,7 @@ void Graph::readPathBegin(ifstream & fin, const string & strLine)
         return node.getNodeName() == strLine;
     });
 
-    pathBegin->setNodeMinWeight(0);
+    pathBegin->setNodeWeight(0);
 }
 
 void Graph::readPathEnd(ifstream & fin, const string & strLine)
@@ -68,25 +69,25 @@ void Graph::readFile(ifstream & fin)
 
     while (getline(fin, strLine))
     {
-        if (strLine == "***Nodes:")
+        if (strLine == "[Nodes]")
         {
             state = 0;
             continue;
         }
 
-        if (strLine == "***Arcs: (from to weight)")
+        if (strLine == "[Arcs] (from to weight)")
         {
             state = 1;
             continue;
         }
 
-        if (strLine == "***Path-begin:")
+        if (strLine == "[Path-begin]")
         {
             state = 2;
             continue;
         }
 
-        if (strLine == "***Path-end:")
+        if (strLine == "[Path-end]")
         {
             state = 3;
             continue;
@@ -103,31 +104,36 @@ void Graph::dijkstra()
 {
     for (size_t i = 0; i < _nodes.size(); ++i)
     {
-        size_t minWeightElementNumber = 0;
+        /* Search node with minimal weight */
+        size_t nodeWithMinWeight = 0;
         float weight = numeric_limits<float>::max();
 
         for (size_t k = 0; k < _nodes.size(); ++k)
         {
-            if (!_nodes[k].getChecked() && _nodes[k].getNodeMinWeight() < weight)
+            if (!_nodes[k].getChecked() && _nodes[k].getNodeWeight() < weight)
             {
-                weight = _nodes[k].getNodeMinWeight();
-                minWeightElementNumber = k;
+                weight = _nodes[k].getNodeWeight();
+                nodeWithMinWeight = k;
             }
         }
 
-        for (size_t j = 0; j < _arcs.size(); ++j)
+        /* Check optimality move between the two nodes */
+        for (size_t j = 0; j <_nodes[nodeWithMinWeight].getQuantityOwnArcs(); ++j)
         {
-            if (_arcs[j].getFrom() == &_nodes[minWeightElementNumber] &&
-                _arcs[j].getTo()->getNodeMinWeight() >(_arcs[j].getFrom()->getNodeMinWeight() + _arcs[j].getWeight()))
+            size_t arcIndex = _nodes[nodeWithMinWeight].getOwnArc(j);
+
+            if (_arcs[arcIndex].getTo()->getNodeWeight() >
+                (_arcs[arcIndex].getFrom()->getNodeWeight() + _arcs[arcIndex].getWeight()))
             {
-                _arcs[j].getTo()->setNodeMinWeight(_arcs[j].getFrom()->getNodeMinWeight() + _arcs[j].getWeight());
-                _arcs[j].getTo()->setNodeFrom(_arcs[j].getFrom());
+                _arcs[arcIndex].getTo()->setNodeWeight(_arcs[arcIndex].getFrom()->getNodeWeight() + _arcs[arcIndex].getWeight());
+                _arcs[arcIndex].getTo()->setNodeFrom(_arcs[arcIndex].getFrom());
             }
         }
 
-        _nodes[minWeightElementNumber].setChecked();
+        _nodes[nodeWithMinWeight].setChecked();
     }
 
+    /* Output of optimal path */
     vector<string> shortcut;
 
     while (pathEnd != nullptr)
